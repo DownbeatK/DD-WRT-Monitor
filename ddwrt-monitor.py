@@ -7,10 +7,11 @@ import pycurl
 
 old_path = '/home/pi/scripts/ddwrt/old.txt'
 new_path = '/home/pi/scripts/ddwrt/new.txt'
+found_path = '/home/pi/scripts/ddwrt/found.txt'
 
 def download_data(file_name):
 	requests_ftp.monkeypatch_session()
-	resp = requests.Session().list('ftp://ftp.dd-wrt.com/betas/2019/')
+	resp = requests.Session().list('ftp://ftp.dd-wrt.com/betas/2020/')
 	file_path = open(file_name, 'w')
 	file_path.write((resp.content).decode('utf-8'))
 	file_path.close()
@@ -24,6 +25,23 @@ def compare_files():
 		file_path.close()
 		send_pushbullet(x[-1].rstrip())
 	swap_files()
+
+def check_found(version):
+	found_prev = 0
+	file_path = open(found_path, 'r')
+	file_contents = file_path.readlines()
+	file_path.close()
+
+	if(len(version) is 17):
+		for line in file_contents:
+			if(line[:-1] == version):
+				found_prev = 1
+				break
+	if(found_prev is not 1):
+		file_path = open(found_path, 'a+')
+		file_path.write(version)
+		file_path.close()
+		send_pushbullet(version)
 
 def send_pushbullet(version):
 	push_curl = pycurl.Curl()
@@ -43,3 +61,4 @@ if(path.exists(old_path)):
 	download_data(new_path)
 else:
 	download_data(old_path)
+
