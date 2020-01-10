@@ -23,7 +23,7 @@ def compare_files():
 		file_path = open(new_path, 'r')
 		x = file_path.readlines()[-1].split(' ')
 		file_path.close()
-		send_pushbullet(x[-1].rstrip())
+		check_found(x[-1].rstrip())
 	swap_files()
 
 def check_found(version):
@@ -37,6 +37,7 @@ def check_found(version):
 			if(line[:-1] == version):
 				found_prev = 1
 				break
+
 	if(found_prev is not 1):
 		file_path = open(found_path, 'a+')
 		file_path.write(version)
