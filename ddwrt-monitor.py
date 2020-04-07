@@ -4,6 +4,8 @@ import subprocess
 import filecmp
 from os import path
 import pycurl
+import http.client
+import urllib
 
 old_path = '/home/pi/scripts/ddwrt/old.txt'
 new_path = '/home/pi/scripts/ddwrt/new.txt'
@@ -40,9 +42,15 @@ def check_found(version):
 
 	if(found_prev is not 1):
 		file_path = open(found_path, 'a+')
-		file_path.write(version)
+		file_path.write(version + "\n")
 		file_path.close()
+		send_pushover(version)
 		send_pushbullet(version)
+
+def send_pushover(version):
+	conn = http.client.HTTPSConnection("api.pushover.net:443")
+	conn.request("POST", "/1/messages.json", urllib.parse.urlencode({"token": "<TOKEN>", "user": "<USER>", "message": version + " is now available",}), { "Content-type": "application/x-www-form-urlencoded" })
+	conn.getresponse()
 
 def send_pushbullet(version):
 	push_curl = pycurl.Curl()
@@ -62,4 +70,3 @@ if(path.exists(old_path)):
 	download_data(new_path)
 else:
 	download_data(old_path)
-
